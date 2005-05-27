@@ -4,7 +4,7 @@
 
 unsigned char L[BLOCKSIZE], F[BLOCKSIZE], S[BLOCKSIZE];
 int T[BLOCKSIZE];
-char buf[2];
+unsigned char buf[2];
 int I;
 
 
@@ -34,9 +34,9 @@ int main() {
     int n, block=1;
     while (1) {
         if (fread(buf, 1, 2, stdin) < 2) break;
-        I = buf[0] | (buf[1] << 8);
+        I = buf[0] + 256*buf[1];
         if (fread(L, 1, BLOCKSIZE, stdin) < BLOCKSIZE) break;
-        fprintf(stderr, "Block %d\n", block);
+        fprintf(stderr, "Block %d\n", block, I);
         memcpy(F, L, BLOCKSIZE);
         qsort(F, BLOCKSIZE, 1, cmp_char);
         calcT();
