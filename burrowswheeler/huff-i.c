@@ -13,16 +13,19 @@ int main() {
     unsigned char ch;
     Node *current;
     size = fread(buf, 1, BUFSIZE, stdin);
-    for (i=0; i<257; i++) {
+    i = 0;
+    while (i<257) {
         count[i] = make_node();
         count[i]->ch = i;
-        count[i]->weight = (i == 256 ? 1 : 256*buf[2*i+1] + buf[2*i]);
+        i++;
     }
-    current = root = make_tree(count);
-    for (i=512; i<size; i++) {
-        for (j=0; j<8; j++) {
-            if (buf[i] & (1 << j)) current = (Node*) current->r; else
-                current = (Node*) current->l;
+    i = decode_table(count, buf);
+    make_codes(count);
+    current = root = make_root(count);
+    while (i<size) {
+        for (j=7; j>=0; j--) {
+            if (buf[i] & (1 << j)) current = (Node*) current->l; else
+                current = (Node*) current->r;
             if (!current->l || !current->r) {
                 if (current->ch == 256) return 0;
                 ch = current->ch;
@@ -30,6 +33,7 @@ int main() {
                 current = root;
             }
         }
+        i++;
     }
     return 0;
 }
