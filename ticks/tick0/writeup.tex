@@ -1,0 +1,166 @@
+\documentclass[11pt]{article}
+\parindent 0pt
+\parskip 10pt
+\begin{document}
+\title{Part {\sc Ib} Java Tick~0}
+\author{Martin Kleppmann}
+\maketitle
+
+\section{Overview}
+The application developed for the ``Java Tick~0'' complies with the basic
+ticking requirements as well as the three items mentioned as leading to a
+star on the tick list. No further features beyond these specifications were
+introduced. Summarized, the program implements the following features:
+
+\begin{itemize}
+\item Add and remove UML-style class boxes to/from a variable-sized
+    two-dimensional panel.
+\item Class boxes can be dragged around the area for arbitrary placement.
+\item User-defined class names; the class box automatically resizes to fit.
+\item Add and remove method names from individual class boxes. Again,
+     the dimensions of the class box are automatically adjusted.
+\item Save a diagram to file and load a saved diagram.
+\item Print the contents of the panel (as given in the skeleton code).
+\end{itemize}
+
+The graphical user interface consists of one main window (frame) whose
+dominant feature is the central drawing area. Above the drawing area,
+four buttons give quick access to the main graphical editing features:
+{\em Add Class}, {\em Remove Class}, {\em Add Method} and {\em Remove
+Method}. The {\em Add Class} button immediately invokes a dialog in which
+the required class name can be provided. Pressing any of the other three
+buttons puts the panel into a special ``waiting'' state: It expects that the
+next mouse click will be inside the area of one of the class boxes in the
+diagram, and the selected function is then invoked on the box which was
+clicked.
+
+A status bar is situated below the diagram panel in the main window, although
+it is not used in the current design. It may be used for messages to the user
+in future extensions. The menu bar has been extended compared to the skeleton
+code, and now holds the following entries:
+
+\begin{description}
+\item[New] Clears the contents of the diagram and starts a new one.
+\item[Open\dots] Loads a saved diagram from a file selected via a file chooser
+    dialog.
+\item[Save] Writes the current diagram to a previously selected file.
+\item[Save as\dots] Writes the current diagram to a file selected via a file
+    chooser dialog.
+\item[Print] Outputs the window on a printer selected via a printing
+    configuration dialog.
+\item[Exit] Closes the application.
+\end{description}
+
+
+\section{Application architecture}
+\subsection{Class overview}
+The application is implemented in three main classes:
+
+\begin{description}
+\item[TickFrame] A subclass of {\tt javax.swing.JFrame} which creates and
+    manages the graphical user interface: The main window (frame) of the
+    application, the panels, menu bar and buttons inside it. This class is
+    based heavily on the provided skeleton code, to which it adds a few
+    simple extensions (as seen in the screenshot).
+\item[Panel] A subclass of {\tt javax.swing.JPanel} representing the main
+    graphical drawing area of the application window. {\tt TickFrame} creates
+    an instance of {\tt Panel} instead of {\tt JPanel} directly, and
+    {\tt Panel} encapsulates all diagram editing behaviour. In particular, it
+    implements the {\tt java.awt.event.MouseListener} and
+    {\tt java.awt.event.Mouse\-Motion\-Listener} interfaces which allow it to
+    receive its own mouse events.
+\item[ClassBox] An encapsulation of a single class box in a diagram. Its
+    properties include the position of the box, the name and methods of the
+    class, and the fonts used for class name and method listing. {\tt Panel}
+    delegates the rendering (drawing) of an individual class box to its
+    instance of {\tt ClassBox}.
+\end{description}
+
+\subsection{The {\tt Panel} class}
+To clarify the structure of the application, I give a brief description of
+the methods of {\tt Panel}, which implement its core behaviour:
+
+\begin{description}
+\item[clear] Empties the panel. Called by the File/New menu command.
+\item[readStream, writeStream] Reads/writes the diagram from/to an
+    ObjectInputStream or ObjectOutputStream. This is implemented using
+    Java's serialization API: Each {\tt ClassBox} is serializable, so to
+    save the complete diagram, it is sufficient to serialize the collection
+    which holds all {\tt ClassBox} objects.
+\item[addClass, removeClass] Adds/Removes a given {\tt ClassBox} object to/from
+    the diagram.
+\item[addMethod] Adds a method entry to a given {\tt ClassBox} object in the
+    diagram. Opens a dialog box in which the method name can be specified.
+\item[removeMethod] Removes a method entry from a given {\tt ClassBox} object
+    in the diagram. Opens a dialog box with a selection box to choose the
+    method that should be removed.
+\item[setRemoveClassMode] Specifies that the next mouse click inside the area
+    of a class box should call {\bf removeClass} on that box.
+\item[setAddMethodMode] Specifies that the next mouse click inside the area
+    of a class box should call {\bf addMethod} on that box.
+\item[setRemoveMethodMode] Specifies that the next mouse click inside the area
+    of a class box should call {\bf removeMethod} on that box.
+\item[getAtPosition] Determines if a specified point is inside the area of
+    some class box.
+\item[mouseClicked, mousePressed] Events generated by the {\tt MouseListener}
+    interface.
+\item[mouseDragged] Event generated by the {\tt MouseMotionListener} interface.
+\item[paintComponent] Called when the diagram display needs to be refreshed.
+    Clears the background and then calls the {\bf draw} method on all class
+    boxes.
+\end{description}
+
+The encapsulation of these individual features within the {\tt Panel} class
+increase its flexibility and reduce the coupling with {\tt TickFrame}.
+{\tt Panel} does not depend on {\tt TickFrame}, thus it could easily be
+inserted into a completely different GUI environment without modification,
+and without loss of features.
+
+\subsection{GUI dependent features}
+I chose to leave the following methods in {\tt TickFrame} and not to move them
+into {\tt Panel} because they depend too much on the GUI context:
+
+\begin{description}
+\item[openFile, saveFile] Display a {\tt javax.swing.JFileChooser} dialog
+    and opens an ObjectInputStream or ObjectOutputStream from the file stream,
+    which is then given as argument to {\tt Panel.read\-Stream} or
+    {\tt Panel.write\-Stream}.
+\item[printDisplay] as given in the skeleton code.
+\end{description}
+
+\section{Drawing a {\tt ClassBox}}
+
+The application employs several automatic rules to ensure that all class boxes
+are drawn in a useful way. It should be noted that these rules may slightly
+differ from the UML standard (e.g. it is not required that all boxes have the
+same width) but nevertheless help the user in drawing easily readable
+diagrams.
+
+A class box has a minimum width (default: 30~pixels) and a minimum height
+(default: 20~pixels), but its size will automatically be extended to accomodate
+its content. To determine the space requirements of the strings inside the
+box, {\tt java.awt.FontMetrics} is queried both for the class name and the
+method fonts. The size of the box is then adjusted so that it leaves a
+horizontal margin (default: 10~pixels) on the left and the right of the longest
+string, and leaves a vertical margin (default: 4~pixels) above and below the
+class name, as well as above and below the method list.
+
+If the method list is empty, a simple rectangular box is drawn, and the vertical
+margins above and below the method list are discarded. Otherwise, a separation
+line is drawn between the class name and the method list. The methods are
+listed one per line, aligned to the left; the class name is centered with
+respect to the width of the box.
+
+\section{Conclusion}
+The program was tested by using the graphical user interface. It was not
+necessary to write special test harnesses, because all features are directly
+accessible through the GUI and thus can easily be tested manually.
+No formal verification methods were employed.
+
+I found the exercise relatively straightforward, but it was a good experience
+to have to rely on the API documentation as primary reference, instead of
+basing everything on a textbook. However, I fail to see the necessity of this
+write-up, especially at this length. Any reasonably documented source code
+is much clearer than 1000~words of prose.
+
+\end{document}
