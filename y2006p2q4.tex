@@ -1,0 +1,102 @@
+\documentclass{article}
+\parindent 0pt
+\parskip 10pt
+\usepackage{amsfonts}
+\begin{document}
+2006 Paper 2 Question 4
+
+Note that there was a misprint in the published version of this question. 
+The sentence ``Suppose that $a$ and $b$ are co-prime, so $(a,b)=1$.'' should
+appear before the definition of a natural linear combination rather than
+at the beginning of Part \emph{(d)}.
+
+(b)
+
+Let
+\begin{eqnarray*}
+R &=& \{as + bt \;|\; s,t \in \mathbb{Z}\} \quad \mbox{and}\\
+S &=& \{v \cdot (a,b) \;|\; v \in \mathbb{Z}\}.
+\end{eqnarray*}
+Then to show $R=S$ we need to show both $R \subseteq S$ and $S \subseteq R$.
+
+First show $R \subseteq S$, i.e.\ $r \in R \Rightarrow r \in S$.
+
+$r \in R$ so $r = as + bt$. By definition of the highest common factor,
+$(a,b) \;|\; a$ and $(a,b) \;|\; b$.  So there are $a',b' \in \mathbb{Z}$
+such that $a=(a,b)\,a'$ and $b=(a,b)\,b'$.
+Thus $r = (a,b)\,\big(a's + b't\big) = v\cdot(a,b)$ for
+$v = (a's + b't) \in \mathbb{Z}$. So $r \in S$.
+
+Next show $S \subseteq R$, i.e.\ $r \in S \Rightarrow r \in R$.
+
+$r \in S$ so $r = v\,(a,b)$. We have $r \in R$ if there is a solution to the
+linear Diophantine equation $as + bt = r$ for some $s,t \in \mathbb{Z}$.
+Such a solution exists if and only if $(a,b) \;|\; r$, which is the case
+because $r = v\,(a,b)$. The solution for $s$ and $t$ can be found using the
+extended Euclid's algorithm.
+
+(Peter Robinson gives an alternative proof using well-foundedness.)
+
+(c)
+
+Proof by contradiction. Suppose that $ab-a-b$ can be expressed as a natural
+linear combination of $a$ and $b$, i.e.\ that $ab-a-b = as+bt$ for some
+$s,t \in \mathbb{N}_0$. Then
+\begin{equation}\label{y2006p2q4a}
+ab=a(s+1) + b(t+1).
+\end{equation}
+Remember that $a$ and $b$ are co-prime. Therefore in order for $b$ to divide
+the right-hand side of this equation, we must have $b \;|\; (s+1)$. Now $s$
+cannot be negative, so $s+1>0$, so we must have $s+1 \ge b$ because $s+1$
+must be an integer multiple of $b$.
+
+By a similar argument, we obtain $t+1 \ge a$. Substitute these two inequalities
+into (\ref{y2006p2q4a}), then we get
+$$ab \ge ab + ba = 2ab,$$
+which is a contradiction since $a$ and $b$ are natural numbers. Therefore our
+assumption must have been false. So $ab-a-b$ cannot be expressed as a natural
+linear combination of $a$ and $b$.
+
+(d)
+
+We are given any $n \in \mathbb{N}$ with $n > ab-a-b$. Because $a$ and $b$ are
+co-prime (i.e.\ $(a,b)=1$) we know that we can always express $n$ as a linear
+combination $n=as+bt$ provided we allow $s$ and $t$ to range over negative
+numbers too (i.e.\ $s,t \in \mathbb{Z}$). Now we want to know whether this
+also holds for \emph{natural} linear combinations with $s,t \ge 0$.
+Consider 4 different cases for the values of $s$ and $t$:
+\begin{enumerate}
+\item $s \ge 0$ and $t \ge 0$. Then this is already a natural linear combination,
+and we are done.
+
+\item $s < 0$ and $t < 0$. Then because $a$ and $b$ are natural numbers,
+$n=as+bt<0$ which we have excluded by assumption.
+
+\item $s \ge 0$ and $t < 0$. In this case pick the least $k \in \mathbb{N}$
+such that $ka+t \ge 0$. (``The least'' means that if $k$ was smaller by one,
+the inequality would no longer hold, i.e.\ $(k-1)a+t<0$.) Now
+\begin{eqnarray*}
+n &=& as + bt\\
+&=& as - kab + bt + kab\\
+&=& a(s-kb) + b(t+ka)
+\end{eqnarray*}
+We already know that $ka+t \ge 0$ so we still need to show that $s-kb \ge 0$ in
+order for a natural linear combination to exist.
+
+Recall that we are assuming $n \ge ab-a-b+1$. So
+\begin{eqnarray*}
+a(s-kb) + b(t+ka) &\ge& ab-a-b+1 \\
+\iff a(s-kb) &\ge& ab-a-b+1-b(t+ka) \\
+&=& -\big((k-1)a+t\big)b - a - b + 1 \\
+&\ge& b - a - b + 1 \\
+&=& 1 - a \\
+&>& -a
+\end{eqnarray*}
+The inequality $a(s-kb) > -a$ holds if $s-kb \ge 0$, as required.
+
+\item $s < 0$ and $t \ge 0$. This case is similar to the previous one with the
+variables exchanged.
+\end{enumerate}
+We have covered all possible cases, so we can always find a natural linear
+combination under the assumptions stated above.
+\end{document}
