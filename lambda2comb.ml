@@ -136,4 +136,3 @@ print ("\n\nThe factorial function in lambda calculus:\n"
   ^ (prettyPrint fact) ^ "\n\n"
   ^ (printSteps(fact, "Translating into combinators, step by step:\n")) ^ "\n\n");
 
-quit();

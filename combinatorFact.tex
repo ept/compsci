@@ -1,0 +1,11 @@
+\documentclass[a4paper,landscape]{article}
+\usepackage{pstricks,pst-tree,pst-node}
+\usepackage[landscape]{geometry}
+\begin{document}
+Factorial function in $\lambda$ calculus
+
+$\mathbf{Y}(\mathbf{B}\,(\mathbf{S}\,(\mathbf{C}\,(\mathbf{B}\,\mathrm{if}\,(\mathbf{C}\,(\mathbf{B}=\mathbf{I})\,0))\,1))\,(\mathbf{B}\,(\mathbf{S}\,(\mathbf{B}\ast\mathbf{I}))\,(\mathbf{C}\,(\mathbf{B}\,\mathbf{B}\,\mathbf{I})\,(\mathbf{C}\,(\mathbf{B}-\mathbf{I})\,1))))$
+
+\pstree[levelsep=1cm]{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=solid]{$\mathbf{Y}$}\pstree{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{B}$}\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{S}$}\pstree{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{C}$}\pstree{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{B}$}\Tcircle[linestyle=none]{if}}\pstree{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{C}$}\pstree{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{B}$}\Tcircle[linestyle=none]{=}}\Tcircle[linestyle=none]{$\mathbf{I}$}}}\Tcircle[linestyle=none]{$0$}}}}\Tcircle[linestyle=none]{$1$}}}}\pstree{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{B}$}\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{S}$}\pstree{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{B}$}\Tcircle[linestyle=none]{$\ast$}}\Tcircle[linestyle=none]{$\mathbf{I}$}}}}\pstree{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{C}$}\pstree{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{B}$}\Tcircle[linestyle=none]{$\mathbf{B}$}}\Tcircle[linestyle=none]{$\mathbf{I}$}}}\pstree{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{C}$}\pstree{\TR{}}{\pstree{\TR{}}{\Tcircle[linestyle=none]{$\mathbf{B}$}\Tcircle[linestyle=none]{$-$}}\Tcircle[linestyle=none]{$\mathbf{I}$}}}\Tcircle[linestyle=none]{$1$}}}}}}}
+
+\end{document}
