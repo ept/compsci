@@ -1,0 +1,10 @@
+(b)(i) clash graph:  a --- b --- c --- d --- a
+
+    mov a,#1        {} live
+    mov b,#1        {a}
+    add c,a,b       {a,b}
+    add d,b,c       {b,c}
+    add a,c,d       {c,d}
+    add b,d,a       {d,a}
+
+(b)(ii) c(k) = 2 if k is even, c(k) = 3 if k is odd.

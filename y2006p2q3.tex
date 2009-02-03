@@ -1,0 +1,86 @@
+\documentclass{article}
+\parindent 0pt
+\parskip 10pt
+\usepackage{amsfonts}
+\begin{document}
+2006 Paper 2 Question 3
+
+(c)
+
+Assume $m$ is composite, so $m=ab$ for some integers $a,b>1$.
+
+Consider the expression
+\begin{eqnarray}
+x &=& (2^a - 1)(2^{a(b-1)} + 2^{a(b-2)} + \cdots + 2^a + 1)\nonumber\\
+&=& \begin{array}[t]{lllccccclcl}
+2^{a+a(b-1)} &+& 2^{a+a(b-2)} &+& \cdots &+& 2^{a+a} &+& 2^a \\
+& -( & 2^{a(b-1)} &+& 2^{a(b-2)} &+& \cdots &+& 2^a &+& 1) \\
+\end{array}\nonumber\\
+&=& 2^{ab} - 1 \nonumber\\
+&=& M_m \nonumber
+\end{eqnarray}
+The first line specifies $x=M_m$ as a product of two factors, so $M_m$ is
+composite when $m$ is composite.
+
+(d)(i)
+
+We know by Fermat's little theorem that if $m$ is prime,
+$2^m \equiv 2 \;\mbox{(mod $m$)}$, i.e.
+$2^m = 2 + km$ for some $k \in \mathbb{N}$.
+
+We want to show that $M_m$ is either prime or pseudo-prime. $M_m$ is pseudo-prime
+iff $M_m$ is composite and $2^{(M_m)} \equiv 2 \;\mbox{(mod $M_m$)}$. 
+If $M_m$ is prime, this congruence also holds (by Fermat's little theorem).
+Therefore to check whether $M_m$ is either prime or pseudo-prime, it is necessary
+and sufficient to check whether the congruence holds:
+\begin{eqnarray*}
+2^{(M_m)} &\equiv& 2 \;\mbox{(mod $M_m$)} \\
+\iff 2^{(2^m - 1)} &\equiv& 2 \;\mbox{(mod $M_m$)} \\
+\iff 2^{(2 + km - 1)} &\equiv& 2 \;\mbox{(mod $M_m$)} \quad
+\mbox{($k \in \mathbb{N}$, as above)} \\
+\iff 2 (2^m)^k &\equiv& 2 \;\mbox{(mod $M_m$)} \\
+\iff 2 (1)^k &\equiv& 2 \;\mbox{(mod $M_m$)} \quad
+\mbox{(because $M_m = 2^m - 1$ so $2^m \equiv 1 \;\mbox{(mod $M_m$)}$)}\\
+\iff 2 &\equiv& 2 \;\mbox{(mod $M_m$)}
+\end{eqnarray*}
+This proves the proposition.
+
+(d)(ii)
+
+In the previous part we assumed only that $2^m \equiv 2 \;\mbox{(mod $m$)}$,
+which holds for both primes and pseudo-primes. Therefore if we assume that
+$m$ is pseudo-prime, the same argument holds and we know that
+$2^{(M_m)} \equiv 2 \;\mbox{(mod $M_m$)}$.
+
+However, we proved in part (c) that if $m$ is composite, $M_m$ must also be
+composite. Therefore if $m$ is pseudo-prime, then $M_m$ cannot be prime,
+so $M_m$ must be pseudo-prime.
+
+(d)(iii)
+
+Define a sequence $P$ of pseudo-primes as follows: $P_{k+1} = M_{(P_k)}$.
+Furthermore let $P_0 = 561$. We need to prove that this sequence consists
+only of pseudo-primes, and that it contains an infinite number of distinct
+pseudo-primes. By induction:
+\begin{itemize}
+\item Base case: $P_0 = 561$ is pseudo-prime. (Proof below if you don't believe it)
+\item Induction step: Assume $P_k$ is pseudo-prime. Then by the proof in part (ii)
+    above, $P_{k+1} = M_{(P_k)}$ is also pseudo-prime. Moreover $P_{k+1}$ is
+    strictly greater that $P_k$, so there can be no repetition in the sequence $P$.
+\end{itemize}
+Therefore all items of the sequence $P$ are pseudo-prime, and they are all distinct,
+and the sequence is non-terminating. Therefore there must exist infinitely many
+pseudo-primes.
+
+(Optional) Proof that 561 is pseudo-prime:
+
+$561 = 3 \cdot 11 \cdot 17$ is pseudo-prime, because it is composite and it also
+satisfies the congruence $2^{561} \equiv 2 \;\mbox{(mod 561)}$:
+
+$2^{561} \equiv \big((2^{11})^{17}\big)^3 \equiv (2048^{17})^3 \equiv
+(365^{17})^3 \equiv \big(365(365^2)^8\big)^3 \equiv \big(365(268^2)^4\big)^3 \equiv
+(365\cdot 16^4)^3 \equiv (365 \cdot 460)^3 \equiv 161^3 \equiv 2 \;\mbox{(mod 561)}$
+
+These congruences can be found on a calculator by evaluating the innermost term and
+replacing it by its remainder modulo 561.
+\end{document}
