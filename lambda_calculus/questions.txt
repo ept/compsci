@@ -1,0 +1,106 @@
+FFP Supervision 1:
+
+1. Which different kinds of equivalence relations are there between lambda
+expressions, and and what can you say about them?
+
+2. Do mainstream programming languages use normal order reduction? Why/ why not?
+
+3. Write out the reduction steps for the terms on the slide with the title "How
+many reductions?".
+
+4. Give two different reduction sequences that start at (λx. (λy.xy)z)y and end
+with a normal form.
+
+5. Syntax trees for lambda expressions are always binary trees; inner nodes are
+labelled with λ or @ (the latter meaning function application); leaf nodes are
+labelled with variables. Draw syntax trees for all of the reduction steps form
+question 4.
+
+6. Using the lambda expressions for booleans as given in the lecture, define the
+xor function in pure lambda calculus. Write down the full expression for
+"xor(true, false)" and reduce it to normal form. The result should be the lambda
+expression representing the boolean true.
+
+
+FFP Supervision 2:
+
+1. Church numerals: Calculate (mult 2 3) and (exp 2 3), writing everything out
+in full pure λ calculus. (Yes, it's a lot of writing, but it's a good exercise.)
+Also explain in words how the exponential function works.
+
+2. Do the exercises on the slide with the title "Decrement and subtraction",
+drawing syntax trees to clarify the meaning of your expressions. It's ok to use
+shorthand functions (SUC, PAIR, FST etc). Note the subtle little comma in the
+definition of PFN. What does it mean? (If the lecturer has removed the comma,
+ignore this last part.)
+
+3. Give a λ calculus expression which will take a list (as defined on slide 60)
+and reverse it. You may use the fixed point combinator Y. (You may find it
+useful to first write it in ML, then translate it into λ calculus.)
+
+4. Consider the following ISWIM expression:
+let add = λa, b. a + b in let inc = add 1 in inc 5;
+Show how this expression is evaluated step by step by a SECD machine. (Just show
+that you get the general idea -- you'll get very bored trying to write it all
+out.)
+
+
+FFP Supervision 3:
+
+1. Write the factorial function in ML. Translate it into λ calculus (using the Y
+combinator), then translate it from there into combinators. You may assume
+integers, booleans and arithmetic operations to be primitives in the λ calculus
+and combinators. Draw the final syntax tree of the combinator expression (which
+must have more no more remaining lambdas in it!).
+
+2. http://www.cl.cam.ac.uk/teaching/exams/pastpapers/y2006p5q10.pdf
+
+3. Give types for the combinators S, K, I, C and B.
+
+4. http://www.cl.cam.ac.uk/teaching/exams/pastpapers/y2004p6q10.pdf
+
+5. Take a look at the attached ML program. Run it to check your answer to
+question 1. (But don't run it as long as you've not attempted question 1 on
+paper!)
+
+
+FFP Supervision 4:
+
+1. The slide with title "CPS and State" gives rules to transform imperative
+statements with mutable state into call-by-value continuation passing form. Give
+similar rules for transformation into call-by-name continuation passing form.
+(Hint: see the first few slides of the "Continuations" section.) Also try to
+think of a transformation rule for sequential composition (the semicolon
+operator).
+
+2. Transform the identity function (λx.x) into a call-by-value continuation
+passing form with state.
+
+3. Perform the same transformation with [(λx.x) a] and reduce the resulting
+expression to normal form.
+
+4. Assuming that our language contains a primitive addition operator (+), define
+a transformation rule into call-by-value continuation passing form with state,
+and transform the expression (a + 1).
+
+5. Perform the same transformation on the expression (x = ref 0; x := !x + 1).
+
+
+Attachments:
+
+Attached is a small Java application for demonstrating combinator reduction. I'm
+afraid it's not particularly well documented, since I just wrote it for
+myself... You give it a combinator string and the number of reduction steps as
+command line arguments, and it writes a LaTeX file to standard output. You need
+to redirect that into a file, run it through latex, run it through dvips, and
+finally convert it to PDF, using gs or similar... (running pdflatex directly
+won't work!) So don't worry if you can't be bothered!
+
+I also include two examples of the program's output. In combinator1 I have
+skipped steps 10-15, 17-24 and 26-35 to make it a bit clearer what is going on.
+In combinator2 I have subscripted the combinators and also included a variable,
+so you can follow the symbols more easily on their journey around the syntax
+tree.
+
+Finally, I attach an ML program for automatically transforming a λ calculus
+expression into its equivalent combinator representation.
