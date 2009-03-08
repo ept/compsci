@@ -1,23 +1,33 @@
 load "Int";
-load "Binarymap";
-
-datatype 'a state = STATE of (string, 'a) Binarymap.dict;
 
 datatype expr =
-    TRANS of expr * expr * expr     (* TRANS(e, k, s) == "[[ e ]] (k, s)"     *)
-  | PAIR of expr * expr             (* PAIR(e1, e2) == "(e1, e2)"             *)
-  | TRIPLE of expr * expr * expr    (* TRIPLE(e1, e2, e3) == "(e1, e2, e3)"   *)
+    TRANS of expr * expr * expr     (* TRANS(e, k, s) == "[[ e ]] (k, s)"       *)
+  | PAIR of expr * expr             (* PAIR(e1, e2) == "(e1, e2)"               *)
+  | TRIPLE of expr * expr * expr    (* TRIPLE(e1, e2, e3) == "(e1, e2, e3)"     *)
   | LAMBDA of expr * expr           (* LAMBDA(x, e) == "lambda x. e"  -- x can only be VAR, PAIR or TRIPLE *)
-  | APP of expr * expr              (* APP(e1, e2) == "e1 e2"                 *)
-  | SEQ of expr * expr              (* SEQ(e1, e2) == "e1; e2"                *)
-  | ASSIGN of expr * expr           (* ASSIGN(x, e) == "x := e"               *)
-  | READ of expr                    (* READ(x) == "!x"                        *)
+  | APP of expr * expr              (* APP(e1, e2) == "e1 e2"                   *)
+  | SEQ of expr * expr              (* SEQ(e1, e2) == "e1; e2"                  *)
+  | ASSIGN of expr * expr           (* ASSIGN(x, e) == "x := e"                 *)
+  | READ of expr                    (* READ(x) == "!x"                          *)
+  | STATE of ((string * expr) list) (* STATE(s) == [(key1 => val1), ...]        *)
+  | GET of expr * expr              (* GET(state, LOC(x)) == state[x]           *)
+  | SET of expr * expr * expr       (* SET(state, LOC(x), val) == state[x=>val] *)
   | LOC of string
   | VAR of string
   | CONST of string;
 
 val var_counter = ref 0;
 fun next_var(prefix) = (var_counter := !var_counter + 1; prefix ^ Int.toString(!var_counter));
+
+exception NotFound;
+
+fun getState([], varName) = raise NotFound
+  | getState((key, value) :: states, varName) = if key = varName then value else (getState(states, varName));
+
+fun setState([], varName, newVal) = [(varName, newVal)]
+  | setState((key, oldVal) :: states, varName, newVal) =
+        if key = varName then (key, newVal) :: states
+                         else (key, oldVal) :: (setState(states, varName, newVal));
 
 
 (* Apply transformation to continuation passing form. *)
@@ -80,6 +90,13 @@ fun isFragile (APP(_,_))    = true
   | isFragile (ASSIGN(_,_)) = true
   | isFragile  _            = false;
 
+(* Join several strings with a separator. *)
+fun join separator [] = ""
+  | join separator [x] = x
+  | join separator (x::xs) = x ^ separator ^ (join separator xs);
+
+
+(* Pretty-print an expression. *)
 fun prettyPrint (TRANS(e, k, s))      = "[[" ^ (prettyPrint e) ^ "]](" ^ (prettyPrint k) ^ ", " ^ (prettyPrint s) ^ ")"
   | prettyPrint (PAIR(e1, e2))        = "<" ^ (prettyPrint e1) ^ ", " ^ (prettyPrint e2) ^ ">"
   | prettyPrint (TRIPLE(e1, e2, e3))  = "<" ^ (prettyPrint e1) ^ ", " ^ (prettyPrint e2) ^ ", " ^ (prettyPrint e3) ^ ">"
@@ -88,6 +105,7 @@ fun prettyPrint (TRANS(e, k, s))      = "[[" ^ (prettyPrint e) ^ "]](" ^ (pretty
   | prettyPrint (SEQ(m, n))           = (maybeBrackets m) ^ "; " ^ (maybeBrackets n)
   | prettyPrint (ASSIGN(x, e))        = (maybeBrackets x) ^ " := " ^ (maybeBrackets e)
   | prettyPrint (READ x)              = "!" ^ (maybeBrackets x)
+  | prettyPrint (STATE s)             = "{" ^ (join ", " (map (fn(k,v) => k ^ " => " ^ (prettyPrint v)) s)) ^ "}"
   | prettyPrint (LOC x)               = "ref " ^ x
   | prettyPrint (VAR x)               = x
   | prettyPrint (CONST c)             = c
@@ -112,7 +130,7 @@ fun printReductionSteps (expr, str) =
        else (printReductionSteps (expr2, str ^ "\n" ^ (prettyPrint expr2) ^ "\n")) end;
 
 
-val example = TRANS(APP(LAMBDA(VAR("x"), VAR("x")), CONST("1")), VAR("k"), VAR("s"));
+val example = TRANS(APP(LAMBDA(VAR("x"), VAR("x")), CONST("1")), VAR("k"), STATE([("y",CONST("1"))]));
 val (translated, translation_steps) = printTranslationSteps(example, prettyPrint(example) ^ "\n");
 val (reduced, reduction_steps) = printReductionSteps(translated, translation_steps);
 
