@@ -14,7 +14,8 @@ datatype expr =
   | SET of expr * expr * expr       (* SET(state, LOC(x), val) == state[x=>val] *)
   | LOC of string
   | VAR of string
-  | CONST of string;
+  | CONST of string
+  | UNIT;
 
 val var_counter = ref 0;
 fun next_var(prefix) = (var_counter := !var_counter + 1; prefix ^ Int.toString(!var_counter));
@@ -31,7 +32,8 @@ fun setState([], varName, newVal) = [(varName, newVal)]
 
 
 (* Apply transformation to continuation passing form. *)
-fun translate (TRANS(VAR(x), k, s)) = APP(k, PAIR(VAR(x), s))
+fun translate (TRANS(LOC(x), k, s)) = APP(k, PAIR(LOC(x), s))
+  | translate (TRANS(VAR(x), k, s)) = APP(k, PAIR(VAR(x), s))
   | translate (TRANS(CONST(c), k, s)) = APP(k, PAIR(CONST(c), s))
   | translate (TRANS(LAMBDA(VAR(x), e), k, s)) = 
       let val k1 = VAR(next_var("k")) and s1 = VAR(next_var("s")) in
@@ -44,6 +46,30 @@ fun translate (TRANS(VAR(x), k, s)) = APP(k, PAIR(VAR(x), s))
             LAMBDA(PAIR(x1, s1),
                 TRANS(n,
                     LAMBDA(PAIR(x2, s2), APP(x1, TRIPLE(x2, k, s2))),
+                    s1)),
+            s)
+      end
+  | translate (TRANS(READ x, k, s)) =
+      let val x1 = VAR(next_var("x")) and s1 = VAR(next_var("s")) in
+        TRANS(x, LAMBDA(PAIR(x1, s1), APP(k, PAIR(GET(s1, x), s1))), s)
+      end
+  | translate (TRANS(ASSIGN(x, v), k, s)) =
+      let val x1 = VAR(next_var("x")) and s1 = VAR(next_var("s"))
+          and x2 = VAR(next_var("x")) and s2 = VAR(next_var("s")) in
+        TRANS(x, 
+            LAMBDA(PAIR(x1, s1),
+                TRANS(v,
+                    LAMBDA(PAIR(x2, s2), APP(k, PAIR(UNIT, SET(s2, x1, x2)))),
+                    s1)),
+            s)
+      end
+  | translate (TRANS(SEQ(m, n), k, s)) =
+      let val x1 = VAR(next_var("x")) and s1 = VAR(next_var("s"))
+          and x2 = VAR(next_var("x")) and s2 = VAR(next_var("s")) in
+        TRANS(m, 
+            LAMBDA(PAIR(x1, s1),
+                TRANS(n,
+                    LAMBDA(PAIR(x2, s2), APP(k, PAIR(x2, s2))),
                     s1)),
             s)
       end
@@ -68,6 +94,8 @@ fun substitute (VAR(x), y, m) = if x = y then m else VAR(x)
   | substitute (TRIPLE(e, f, g), x, m) = TRIPLE(substitute(e, x, m), substitute(f, x, m), substitute(g, x, m))
   | substitute (LAMBDA(e, f), x, m) = if freeVar(e, x) then LAMBDA(e, f) else LAMBDA(e, substitute(f, x, m))
   | substitute (APP(e, f), x, m) = APP(substitute(e, x, m), substitute(f, x, m))
+  | substitute (GET(e, f), x, m) = GET(substitute(e, x, m), substitute(f, x, m))
+  | substitute (SET(e, f, g), x, m) = SET(substitute(e, x, m), substitute(f, x, m), substitute(g, x, m))
   | substitute (x, _, _) = x;
 
 
@@ -76,10 +104,14 @@ fun reduce (APP(LAMBDA(VAR(x), e), f)) = substitute(e, x, f)
   | reduce (APP(LAMBDA(PAIR(VAR(x), VAR(y)), e), PAIR(f, g))) = substitute(substitute(e, x, f), y, g)
   | reduce (APP(LAMBDA(TRIPLE(VAR(x), VAR(y), VAR(z)), e), TRIPLE(f, g, h))) =
       substitute(substitute(substitute(e, x, f), y, g), z, h)
+  | reduce (GET(STATE(s), LOC(x))) = getState(s, x)
+  | reduce (SET(STATE(s), LOC(x), e)) = STATE(setState(s, x, e))
   | reduce (PAIR(e, f)) = PAIR(reduce e, reduce f)
   | reduce (TRIPLE(e, f, g)) = TRIPLE(reduce e, reduce f, reduce g)
   | reduce (LAMBDA(e, f)) = LAMBDA(e, reduce f)
   | reduce (APP(e, f)) = APP(reduce e, reduce f)
+  | reduce (GET(e, f)) = GET(reduce e, reduce f)
+  | reduce (SET(e, f, g)) = SET(reduce e, reduce f, reduce g)
   | reduce x = x;
 
 
@@ -88,6 +120,7 @@ fun isFragile (APP(_,_))    = true
   | isFragile (LAMBDA(_,_)) = true
   | isFragile (SEQ(_,_))    = true
   | isFragile (ASSIGN(_,_)) = true
+  | isFragile (READ(_))     = true
   | isFragile  _            = false;
 
 (* Join several strings with a separator. *)
@@ -106,9 +139,12 @@ fun prettyPrint (TRANS(e, k, s))      = "[[" ^ (prettyPrint e) ^ "]](" ^ (pretty
   | prettyPrint (ASSIGN(x, e))        = (maybeBrackets x) ^ " := " ^ (maybeBrackets e)
   | prettyPrint (READ x)              = "!" ^ (maybeBrackets x)
   | prettyPrint (STATE s)             = "{" ^ (join ", " (map (fn(k,v) => k ^ " => " ^ (prettyPrint v)) s)) ^ "}"
-  | prettyPrint (LOC x)               = "ref " ^ x
+  | prettyPrint (GET(s, x))           = (maybeBrackets s) ^ "[" ^ (prettyPrint x) ^ "]"
+  | prettyPrint (SET(s, x, v))        = (maybeBrackets s) ^ "[" ^ (prettyPrint x) ^ " => " ^ (prettyPrint v) ^ "]"
+  | prettyPrint (LOC x)               = x
   | prettyPrint (VAR x)               = x
   | prettyPrint (CONST c)             = c
+  | prettyPrint UNIT                  = "()"
 and maybeBrackets m =
     let val fragile = isFragile m
       in (if fragile then "(" else "") ^ (prettyPrint m) ^ (if fragile then ")" else "") end;
@@ -130,8 +166,35 @@ fun printReductionSteps (expr, str) =
        else (printReductionSteps (expr2, str ^ "\n" ^ (prettyPrint expr2) ^ "\n")) end;
 
 
-val example = TRANS(APP(LAMBDA(VAR("x"), VAR("x")), CONST("1")), VAR("k"), STATE([("y",CONST("1"))]));
+val example = TRANS(APP(LAMBDA(VAR("x"), VAR("x")), CONST("1")), VAR("k"), STATE([]));
+
 val (translated, translation_steps) = printTranslationSteps(example, prettyPrint(example) ^ "\n");
 val (reduced, reduction_steps) = printReductionSteps(translated, translation_steps);
 
-print ("\n\nExample: constant 1 applied to identity function\n\n" ^ reduction_steps);
+val example2 = TRANS(ASSIGN(LOC("y"), CONST("2")), VAR("k"), STATE([("y",CONST("1"))]));
+
+val (translated2, translation_steps2) = printTranslationSteps(example2, prettyPrint(example2) ^ "\n");
+val (reduced2, reduction_steps2) = printReductionSteps(translated2, translation_steps2);
+
+val example3 =
+    TRANS(
+        SEQ(
+            ASSIGN(                     (* f := (^x. y := x; 2) *)
+                LOC("f"),
+                LAMBDA(VAR("x"), SEQ(ASSIGN(LOC("y"), VAR("x")), CONST("2")))
+            ),
+            ASSIGN(                     (* y := ((!f)(42)) *)
+                LOC("y"),
+                APP(READ(LOC("f")), CONST("42"))
+            )
+        ),
+        VAR("k"),
+        STATE([("y",CONST("1"))])
+    );
+
+val (translated3, translation_steps3) = printTranslationSteps(example3, prettyPrint(example3) ^ "\n");
+val (reduced3, reduction_steps3) = printReductionSteps(translated3, translation_steps3);
+
+print ("\n\nExample 1: constant 1 applied to identity function\n\n" ^ reduction_steps);
+print ("\n\nExample 2: simple variable assignment\n\n" ^ reduction_steps2);
+print ("\n\nExample 3: a contrived sequence of assignments\n\n" ^ reduction_steps3);
