@@ -1,0 +1,58 @@
+Databases notes
+===============
+
+Candidate key (or simply "key"):
+    A set of fields is a (candidate) key for a relation if
+    1. no two distinct tuples can have the same values in all the key
+       fields; and
+    2. this is not true for any subset of the key.
+    i.e. a candidate key is a minimum set of fields which determines all the
+    others.
+
+Superkey:
+    A set of fields which is a superset of a (candidate) key.
+
+Primary key:
+    If there's more than one key for a relation, then one is chosen by the
+    Database administrator to be the primary key. It is one of the candidate
+    keys; the primary key is only a declaration to the database and does not
+    change the functional dependencies.
+
+Prime attribute/field:
+    A field which is a member some the set of fields which constitutes a
+    candidate key.
+
+Foreign key:
+    A set of fields in one relation that is used to refer uniquely to one
+    particular tuple in another relation. This is done by setting the foreign
+    key fields to the values of the primary key fields in the referenced
+    relation. It's a bit like a pointer or object reference.
+
+
+Alternative definitions of normal forms
+---------------------------------------
+
+Normal forms:
+
+2NF: consider the following example: relation R(A,B,C,D) where {A,B} is
+the key. If there is a functional dependency B->C in this relation, it
+is not in 2NF. This could be fixed by decomposing into two relations,
+R(A,B,D) with key {A,B} and S(B,C) with key {B}.
+
+3NF, BCNF:
+
+Consider a relation R(U) with a set of attributes U and a set of
+functional dependencies F. (F+ is the transitive closure of F)
+
+A dependency X->A in F+ is "transitive" if A is not an element of X (it
+is non-trivial), and if there exists some Y, a subset of U, such that A
+is not an element of Y, and X->Y is in F+, and Y->A is in F+, and Y->X
+is not in F+.
+
+A dependency X->A in F+ is "direct" if it is not transitive.
+
+3NF: R is in 3NF if: for all attributes A which are not members of a
+candidate key, and for all keys K, K->A is direct.
+
+BCNF: R is in BCNF if: for all attributes A (whether members of a key or
+not) and for all keys K, K->A is direct.
