@@ -106,3 +106,24 @@ mergeSort(In, Out) :-
     mergeSort(L2, S2),
     merge(S1, S2, Out).
 
+%Bubble sort
+
+swap([X,Y|Rest], [Y,X|Rest]) :- X>Y.
+swap([Z|Rest], [Z|Rest1]) :- swap(Rest, Rest1).
+  
+bubbleSort(List, Sorted) :-
+	swap(List, List1), !,
+	bubbleSort(List1, Sorted).
+bubbleSort(Sorted, Sorted).
+
+%Insertion sort
+
+insert(A, [B|C], [B|D]) :- A @> B, !, insert(A, C, D).
+insert(A, C, [A|C]).
+
+insertionSort(L, Sorted) :- insertionSort(L, [], Sorted).
+
+insertionSort([], Acc, Acc).
+insertionSort([H | T], Acc, Sorted) :- 
+	insert(H, Acc, Acc1),
+	insertionSort(T, Acc1, Sorted).
